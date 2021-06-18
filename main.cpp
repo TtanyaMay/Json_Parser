@@ -11,7 +11,7 @@ void get_value(const json& j, UnaryFunction f)
 	{
 		if (it->is_structured())
 		{
-			recursive_iterate(*it, f);
+			get_value(*it, f);
 		}
 		else
 		{
@@ -19,20 +19,46 @@ void get_value(const json& j, UnaryFunction f)
 		}
 	}
 }
-int main(int argc, char** argv) {
-	std::ifstream i("input.json");
-	json j = json::parse(i);
-	std::multimap<std::string, json> map;
 
-	get_value(j, [&](json::const_iterator it)
-		{
-			map.insert({ it.key(), it.value() });
-		});
-	std::ofstream o("output.json ");
-	for (auto i : map)
+int main(int argc, char** argv)
+{
+	std::ifstream file("input.json");
+	if (!file.is_open())
 	{
-		std::cout << i.first << "\t " << i.second << '\n';
+		std::cerr << "Unable to open file\n";
+		throw 1;
 	}
+	json j;
+	file >> j;
+
+	std::multimap<std::string, json> map;
+	for (auto const& val : j["a"])
+	{
+		get_value(val, [&](json::const_iterator it)
+			{
+				std::cout << "a." << it.key() << "\t" << it.value() << std::endl;
+				std::string s = "a." + it.key();
+				map.insert({ s, it.value() });
+			});
+	}
+	for (auto const& val : j["c"])
+	{
+		get_value(j["c"], [&](json::const_iterator it)
+			{
+				std::cout << "c." << it.key() << "\t" << it.value() << std::endl;
+				std::string s = "c." + it.key();
+				map.insert({ s, it.value() });
+			});
+	}
+	for (auto const& val : j["d"]) {
+		get_value(j["d"], [&](json::const_iterator it)
+			{
+				std::cout << "d" << " " << "\t" << it.value() << std::endl;
+				std::string s = "d";
+				map.insert({ s, it.value() });
+			});
+	}
+	std::ofstream o("output.json ");
 	for (auto i : map)
 	{
 		o << i.first << "\t " << i.second << '\n';
