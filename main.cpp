@@ -11,7 +11,7 @@ void get_value(const json& j, UnaryFunction f)
 	{
 		if (it->is_structured())
 		{
-			recursive_iterate(*it, f);
+			get_value(*it, f);
 		}
 		else
 		{
